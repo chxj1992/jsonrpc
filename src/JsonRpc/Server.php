@@ -180,7 +180,8 @@ class Server
     catch (\Exception $e)
     {
       $this->logException($e);
-      $this->error = Rpc::ERR_INTERNAL;
+      //$this->error = Rpc::ERR_INTERNAL;
+      $this->error = $e->getMessage();
 
       return;
     }
