@@ -1,17 +1,11 @@
 {
 
-  "name": "jsonrpc/jsonrpc",
-  "description": "JSON-RPC 2.0 client/server implementation",
+  "name": "medlinker/jsonrpc",
+  "description": "Fork from http://github.com/johnstevenson/jsonrpc. JSON-RPC 2.0 client/server implementation",
   "keywords": ["json", "rpc", "json-rpc", "api"],
-  "homepage": "http://github.com/johnstevenson/jsonrpc",
+  "homepage": "http://gitlab.dev.okapp.cc:81/medlinker/jsonrpc",
   "type": "library",
   "license": "MIT",
-  "authors": [
-    {
-      "name": "John Stevenson",
-      "email": "john-stevenson@blueyonder.co.uk"
-    }
-  ],
 
   "require": {
     "php": ">=5.3.0"
