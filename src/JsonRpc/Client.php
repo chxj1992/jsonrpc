@@ -1,9 +1,9 @@
 <?php
 namespace JsonRpc;
 
-use JsonRpc\Base\Rpc;
 use JsonRpc\Base\Request;
 use JsonRpc\Base\Response;
+use JsonRpc\Base\Rpc;
 
 
 class Client
@@ -71,8 +71,7 @@ class Client
         $this->url = $url;
         $this->transport = $transport;
 
-        if (!$this->transport)
-        {
+        if (!$this->transport) {
             $this->transport = new Transport\BasicClient();
         }
 
@@ -82,12 +81,9 @@ class Client
     public function addHeaders($value)
     {
 
-        if (is_array($value))
-        {
+        if (is_array($value)) {
             $this->headers = array_merge($this->headers, $value);
-        }
-        elseif (is_string($value))
-        {
+        } elseif (is_string($value)) {
             $this->headers[] = $value;
         }
 
@@ -114,7 +110,7 @@ class Client
 
     public function notify($method, $params = null)
     {
-        ++ $this->notifications;
+        ++$this->notifications;
         return $this->work($method, $params, true);
     }
 
@@ -129,8 +125,7 @@ class Client
     public function batchSend()
     {
 
-        if (count($this->requests) === 1)
-        {
+        if (count($this->requests) === 1) {
             $this->resetInput();
             throw new \Exception('Batch only has one request');
             return false;
@@ -146,28 +141,24 @@ class Client
 
         $data = array('method' => $method);
 
-        if ($params)
-        {
+        if ($params) {
             $data['params'] = $params;
         }
 
-        if (!$notify)
-        {
-            $data['id'] = ++ $this->id;
+        if (!$notify) {
+            $data['id'] = ++$this->id;
         }
 
         $request = new Request($data);
 
-        if ($request->fault)
-        {
+        if ($request->fault) {
             throw new \Exception($request->fault);
             return false;
         }
 
         $this->requests[] = $request->toJson();
 
-        if (!$this->multi)
-        {
+        if (!$this->multi) {
             return $this->send();
         }
 
@@ -179,35 +170,26 @@ class Client
 
         $this->resetOutput();
 
-        if ($this->multi)
-        {
+        if ($this->multi) {
             $data = '[' . implode(',', $this->requests) . ']';
-        }
-        else
-        {
+        } else {
             $data = $this->requests[0];
         }
 
-        try
-        {
+        try {
 
-            if ($res = $this->transport->send('POST', $this->url, $data, $this->headers))
-            {
+            if ($res = $this->transport->send('POST', $this->url, $data, $this->headers)) {
                 $this->output = $this->transport->output;
                 $res = $this->checkResult();
-            }
-            else
-            {
+            } else {
                 $this->setError($this->transport->error);
             }
 
             $this->resetInput();
 
-            return (bool) $res;
+            return (bool)$res;
 
-        }
-        catch (\Exception $e)
-        {
+        } catch (\Exception $e) {
             $this->setError($e->getMessage());
             return false;
         }
@@ -221,40 +203,30 @@ class Client
         $sent = count($this->requests);
         $expected = $sent - $this->notifications;
 
-        if (!$struct = Rpc::decode($this->output, $batch))
-        {
+        if (!$struct = Rpc::decode($this->output, $batch)) {
 
-            if ($expected)
-            {
+            if ($expected) {
                 $this->setError('Parse error');
             }
 
             return !$expected;
         }
 
-        if ($res = $this->checkResponses($struct, $batch))
-        {
+        if ($res = $this->checkResponses($struct, $batch)) {
 
-            if (!$this->checkReceived($struct, $batch, $expected))
-            {
+            if (!$this->checkReceived($struct, $batch, $expected)) {
                 return;
             }
 
 
-            if ($this->multi)
-            {
+            if ($this->multi) {
                 $this->batch = $struct;
-            }
-            else
-            {
+            } else {
 
-                if (isset($struct->error))
-                {
+                if (isset($struct->error)) {
                     $this->setError($struct->error);
                     $res = false;
-                }
-                else
-                {
+                } else {
                     $this->result = $struct->result;
                 }
 
@@ -272,22 +244,17 @@ class Client
 
         $res = false;
 
-        if ($batch)
-        {
+        if ($batch) {
 
-            foreach ($json_array as $item)
-            {
+            foreach ($json_array as $item) {
 
-                if (!$res = $this->checkResponse($item))
-                {
+                if (!$res = $this->checkResponse($item)) {
                     break;
                 }
 
             }
 
-        }
-        else
-        {
+        } else {
             $res = $this->checkResponse($json_array);
         }
 
@@ -301,8 +268,7 @@ class Client
 
         $response = new Response();
 
-        if (!$res = $response->create($json_array))
-        {
+        if (!$res = $response->create($json_array)) {
             $this->setError($response->fault);
         }
 
@@ -316,26 +282,20 @@ class Client
 
         $received = $batch ? count($struct) : 1;
 
-        if ($received !== $expected || $batch !== $this->multi)
-        {
+        if ($received !== $expected || $batch !== $this->multi) {
 
             $ok = isset($struct->error) && $struct->error->code === Rpc::ERR_PARSE;
 
-            if ($ok && $received === 1)
-            {
+            if ($ok && $received === 1) {
                 $error = 'Response reports Parse error (' . Rpc::ERR_PARSE . ')';
-            }
-            else
-            {
+            } else {
                 $error = 'Mismatched responses';
             }
 
             $this->setError($error);
             return false;
 
-        }
-        else
-        {
+        } else {
             return $batch ? $this->checkBatch($struct, $expected) : true;
         }
 
@@ -345,14 +305,11 @@ class Client
     private function checkBatch(&$struct, $expected)
     {
 
-        if ($res = $this->orderResponses($struct))
-        {
+        if ($res = $this->orderResponses($struct)) {
 
-            for ($i = 0; $i < $expected; ++ $i)
-            {
+            for ($i = 0; $i < $expected; ++$i) {
 
-                if ($struct[$i]->id !== $i + 1)
-                {
+                if ($struct[$i]->id !== $i + 1) {
                     $this->setError('Duplicate response id');
                     $res = false;
                     break;
@@ -370,15 +327,11 @@ class Client
     private function orderResponses(&$struct)
     {
 
-        if (is_array($struct))
-        {
+        if (is_array($struct)) {
 
-            try
-            {
+            try {
                 usort($struct, array($this, 'order'));
-            }
-            catch (\Exception $e)
-            {
+            } catch (\Exception $e) {
                 $this->setError($e->getMessage());
                 return false;
             }
@@ -392,8 +345,7 @@ class Client
     private function order($a, $b)
     {
 
-        if ($a->id == $b->id)
-        {
+        if ($a->id == $b->id) {
             throw new \Exception('Duplicate response ids');
         }
 
@@ -405,14 +357,11 @@ class Client
     private function setError($error)
     {
 
-        if (is_string($error))
-        {
+        if (is_string($error)) {
             $code = 0;
             $message = static::ERR_RPC_RESPONSE;
             $data = $error;
-        }
-        else
-        {
+        } else {
             $code = $error->code;
             $message = $error->message;
             $data = isset($error->data) ? $error->data : null;
