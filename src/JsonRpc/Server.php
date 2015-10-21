@@ -163,7 +163,7 @@ class Server
         } catch (\Exception $e) {
             $this->logException($e);
             //$this->error = Rpc::ERR_INTERNAL;
-            $this->error = json_encode(['code' => $e->getCode(), 'message' => $e->getMessage()]);
+            $this->error = json_encode(['code' => $e->getCode(), 'message' => $e->getMessage().' Trace: '.$e->getTraceAsString()]);
 
             return;
         }
