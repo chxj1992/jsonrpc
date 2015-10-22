@@ -28,7 +28,8 @@ class BasicClient
     );
 
     $context = stream_context_create($opts);
-    $response = @file_get_contents($url, false, $context);
+    #$response = @file_get_contents($url, false, $context);
+    $response = file_get_contents($url, false, $context);
 
     if ($response === false)
     {
