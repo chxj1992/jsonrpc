@@ -156,7 +156,10 @@ class MethodsStatic
     $res = new \stdClass();
 
     $details = is_array($user) ? $user : (array) $user;
-    $res->reply = $msg . ' ' . $details['name'] . ' (' . $details['id'] . ')';
+    $name = (isset($details['name']['firstName']) AND $details['name']['firstName']) ?
+        $details['name']['firstName'] .' '.$details['name']['lastName'] : $details['name'];
+
+    $res->reply = $msg . ' ' . $name . ' (' . $details['id'] . ')';
     $res->class = get_class();
     $res->type = gettype($user);
 

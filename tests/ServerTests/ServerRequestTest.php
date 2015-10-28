@@ -148,6 +148,28 @@ class ServerRequestTest extends ServerTests\Base
 
 
   /**
+   * Checks that using __call does not impact named param checks
+   * calling setObjectsAsArrays()
+   *
+   */
+  public function testClassCallMultiLevelNamedAssoc()
+  {
+    $this->methods = new MethodsClassCall();
+    parent::setUp();
+    $this->server->setObjectsAsArrays();
+
+    $data = '{"jsonrpc": "2.0", "method": "ping",
+      "params": {"msg": "Hello", "user": {"name": {"firstName": "Fred", "lastName": "Wilson"}, "id": 257}},
+      "id": 1}';
+    $expects = '{"jsonrpc": "2.0",
+      "result": {"reply": "Hello Fred Wilson (257)", "class": "MethodsStatic", "type": "array"},
+      "id": 1}';
+    $json = $this->getResponseJson($data, $expects);
+    $this->assertEquals($expects, $json);
+  }
+
+
+  /**
   * Checks that missing positional params are reported as an error
   *
   */

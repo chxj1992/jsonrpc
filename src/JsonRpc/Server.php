@@ -347,7 +347,7 @@ class Server
 
       if (is_object($param))
       {
-        $param = (array) $param;
+        $param = json_decode(json_encode($param), true);
       }
 
     }
