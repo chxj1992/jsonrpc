@@ -304,7 +304,7 @@ class Server
         foreach ($params as &$param) {
 
             if (is_object($param)) {
-                $param = (array)$param;
+                $param = json_decode(json_encode($param), true);
             }
 
         }
