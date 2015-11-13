@@ -14,7 +14,6 @@ class BasicServer
   public function reply($data)
   {
     echo $data;
-    exit;
   }
 
 
