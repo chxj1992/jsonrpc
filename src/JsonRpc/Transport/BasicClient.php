@@ -31,14 +31,14 @@ class BasicClient
 //        $response = file_get_contents($url, false, $context);
 
         $ch = curl_init();
-        curl_setopt ($ch, CURLOPT_HTTPHEADER, implode("\r\n", $headers));
+        curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
         if ($method == 'POST') {
             curl_setopt($ch, CURLOPT_URL, $url);
             // post数据
             curl_setopt($ch, CURLOPT_POST, 1);
             // post的变量
-            curl_setopt($ch, CURLOPT_POSTFIELDS, ['content' => $json]);
+            curl_setopt($ch, CURLOPT_POSTFIELDS, $json);
         } else {
             curl_setopt($ch, CURLOPT_URL, $url.'?content='.$json);
         }
