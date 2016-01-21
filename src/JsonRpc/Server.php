@@ -8,7 +8,6 @@ use JsonRpc\Base\Rpc;
 
 class Server
 {
-
     private $handler;
     private $transport = null;
     private $logger = null;
@@ -18,6 +17,8 @@ class Server
     private $error = null;
     private $handlerError = null;
     private $refClass = null;
+    private $method;
+    private $errorCode = [];
 
 
     public function __construct($methodHandler, $transport = null)
@@ -27,7 +28,6 @@ class Server
 
         $this->handler = $methodHandler;
         $this->transport = $transport;
-
         if (!$this->transport) {
             $this->transport = new Transport\BasicServer();
         }
@@ -69,6 +69,10 @@ class Server
         $this->assoc = true;
     }
 
+    public function setErrorCode($errorCode)
+    {
+        $this->errorCode = $errorCode;
+    }
 
     private function process($json)
     {
@@ -125,7 +129,7 @@ class Server
                 continue;
 
             }
-
+            $this->method = $request->method;
             $result = $this->processRequest($request->method, $request->params);
 
             if (!$request->notification) {
@@ -344,8 +348,21 @@ class Server
 
     private function logException(\Exception $e)
     {
-        $message = 'Exception: ' . $e->getMessage();
-        $message .= ' in ' . $e->getFile() . ' on line ' . $e->getLine();
+        $type = 'SYNTAX';
+        $errorCode = $e->getCode();
+        $getTrace = true;
+        if (!in_array($errorCode, [1, 2, 4]) && in_array($e->getCode(), $this->errorCode)) {
+            $type = 'USERDEFINED';
+            $getTrace = false;
+        }
+        if (preg_match('/SQLSTATE/i', $e->getMessage())) {
+            $type = 'SQLSTATE';
+        }
+        $message =  $type . '|' . get_class($this->handler) . '|' . $this->method .'|' . $e->getMessage();
+        //$message .= ' in ' . $e->getFile() . ' on line ' . $e->getLine();
+        if ($getTrace) {
+            $message .= $e->getTraceAsString();
+        }
         $this->logError($message);
     }
 
@@ -359,7 +376,6 @@ class Server
                 $callback = array($this->logger, 'addRecord');
 
                 $params = array(
-                    500,
                     $message
                 );
 
