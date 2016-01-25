@@ -348,25 +348,14 @@ class Server
 
     private function logException(\Exception $e)
     {
-        $type = 'SYNTAX';
         $errorCode = $e->getCode();
-        $getTrace = true;
-        if (!in_array($errorCode, [1, 2, 4]) && in_array($e->getCode(), $this->errorCode)) {
-            $type = 'USERDEFINED';
-            $getTrace = false;
-        }
-        if (preg_match('/SQLSTATE/i', $e->getMessage())) {
-            $type = 'SQLSTATE';
-        }
-        $message =  $type . '|' . get_class($this->handler) . '|' . $this->method .'|' . $e->getMessage();
-        //$message .= ' in ' . $e->getFile() . ' on line ' . $e->getLine();
-        if ($getTrace) {
-            $message .= $e->getTraceAsString();
-        }
-        $this->logError($message);
+        $message = get_class($this->handler) . '|' . $this->method .'|' . $e->getMessage();
+        $message .= ' in ' . $e->getFile() . ' on line ' . $e->getLine();
+        $traceStr = $e->getTraceAsString();
+        $this->logError($message, $errorCode, $traceStr);
     }
 
-    private function logError($message)
+    private function logError($message, $errorCode = 0, $traceStr = '')
     {
 
         try {
@@ -376,7 +365,9 @@ class Server
                 $callback = array($this->logger, 'addRecord');
 
                 $params = array(
-                    $message
+                    $message,
+                    $errorCode,
+                    $traceStr
                 );
 
                 $result = call_user_func_array($callback, $params);
