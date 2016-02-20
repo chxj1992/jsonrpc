@@ -9,7 +9,7 @@ class BasicClient
     public $error = '';
 
 
-    public function send($method, $url, $json, $headers = array())
+    public function send($method, $url, $json, $headers = array(), $sync = false)
     {
 
         $header = 'Content-Type: application/json';
@@ -33,6 +33,9 @@ class BasicClient
         $ch = curl_init();
         curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+        if ($sync) {
+            curl_setopt($ch, CURLOPT_TIMEOUT, 1);
+        }
         if ($method == 'POST') {
             curl_setopt($ch, CURLOPT_URL, $url);
             // post数据

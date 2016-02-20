@@ -102,16 +102,16 @@ class Client
     }
 
 
-    public function call($method, $params)
+    public function call($method, $params, $sync = false)
     {
-        return $this->work($method, $params);
+        return $this->work($method, $params, false, $sync);
     }
 
 
-    public function notify($method, $params = null)
+    public function notify($method, $params = null, $sync = false)
     {
         ++$this->notifications;
-        return $this->work($method, $params, true);
+        return $this->work($method, $params, true, $sync);
     }
 
 
@@ -122,7 +122,7 @@ class Client
     }
 
 
-    public function batchSend()
+    public function batchSend($sync = false)
     {
 
         if (count($this->requests) === 1) {
@@ -131,12 +131,12 @@ class Client
             return false;
         }
 
-        return $this->send();
+        return $this->send($sync);
 
     }
 
 
-    private function work($method, $params, $notify = false)
+    private function work($method, $params, $notify = false, $sync = false)
     {
 
         $data = array('method' => $method);
@@ -159,13 +159,13 @@ class Client
         $this->requests[] = $request->toJson();
 
         if (!$this->multi) {
-            return $this->send();
+            return $this->send($sync);
         }
 
     }
 
 
-    private function send()
+    private function send($sync = false)
     {
 
         $this->resetOutput();
@@ -178,7 +178,7 @@ class Client
 
         try {
 
-            if ($res = $this->transport->send('POST', $this->url, $data, $this->headers)) {
+            if ($res = $this->transport->send('POST', $this->url, $data, $this->headers, $sync)) {
                 $this->output = $this->transport->output;
                 $res = $this->checkResult();
             } else {
