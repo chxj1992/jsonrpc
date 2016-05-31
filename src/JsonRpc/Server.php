@@ -19,6 +19,7 @@ class Server
     private $refClass = null;
     private $method;
     private $errorCode = [];
+    private $displayTrace = false;
 
 
     public function __construct($methodHandler, $transport = null)
@@ -72,6 +73,10 @@ class Server
     public function setErrorCode($errorCode)
     {
         $this->errorCode = $errorCode;
+    }
+
+    public function displayTrace($displayTrace) {
+        $this->displayTrace = $displayTrace;
     }
 
     private function process($json)
@@ -164,12 +169,21 @@ class Server
 
         try {
             $result = call_user_func_array($callback, $params);
+        } catch (BusinessException $e) {
+            $this->logException($e);
+            $error = ['code' => $e->getCode(), 'message' => $e->getMessage(), 'business' => true];
+            if ($this->displayTrace) {
+                $error['trace'] = $e->getTraceAsString();
+            }
+            $this->error = json_encode($error);
+            return;
         } catch (\Exception $e) {
             $this->logException($e);
-            //$this->error = Rpc::ERR_INTERNAL;
-            //$this->error = json_encode(['code' => $e->getCode(), 'message' => $e->getMessage(), 'trace'=>$e->getTraceAsString()]);
-            $this->error = json_encode(['code' => $e->getCode(), 'message' => $e->getMessage()]);
-
+            $error = ['code' => $e->getCode(), 'message' => $e->getMessage(), 'business' => false];
+            if ($this->displayTrace) {
+                $error['trace'] = $e->getTraceAsString();
+            }
+            $this->error = json_encode($error);
             return;
         }
 
@@ -309,7 +323,7 @@ class Server
         foreach ($params as &$param) {
 
 //            if (is_object($param)) {
-                $param = json_decode(json_encode($param), true);
+            $param = json_decode(json_encode($param), true);
 //            }
 
         }
@@ -350,7 +364,7 @@ class Server
     private function logException(\Exception $e)
     {
         $errorCode = $e->getCode();
-        $message = get_class($this->handler) . '|' . $this->method .'|' . $e->getMessage();
+        $message = get_class($this->handler) . '|' . $this->method . '|' . $e->getMessage();
         $message .= ' in ' . $e->getFile() . ' on line ' . $e->getLine();
         $traceStr = $e->getTraceAsString();
         $this->logError($message, $errorCode, $traceStr);
