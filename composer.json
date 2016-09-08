@@ -1,12 +1,14 @@
 {
-  "name": "medlinker/jsonrpc",
+  "name": "chxj1992/jsonrpc",
   "description": "Fork from http://github.com/johnstevenson/jsonrpc. JSON-RPC 2.0 client/server implementation",
   "keywords": ["json", "rpc", "json-rpc", "api"],
-  "homepage": "http://gitlab.dev.okapp.cc:81/medlinker/jsonrpc",
   "type": "library",
   "license": "MIT",
   "require": {
     "php": ">=5.3.0"
+  },
+  "require": {
+    "phpunit/phpunit": "~4.0"
   },
   "autoload": {
     "psr-0": {"JsonRpc": "src/"}
