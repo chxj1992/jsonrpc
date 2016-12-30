@@ -75,7 +75,8 @@ class Server
         $this->errorCode = $errorCode;
     }
 
-    public function displayTrace($displayTrace) {
+    public function displayTrace($displayTrace)
+    {
         $this->displayTrace = $displayTrace;
     }
 
@@ -320,19 +321,10 @@ class Server
     private function castObjectsToArrays(&$params)
     {
 
-<<<<<<< HEAD
         foreach ($params as &$param) {
-=======
-      if (is_object($param))
-      {
-        $param = json_decode(json_encode($param), true);
-      }
->>>>>>> a514443ee8d4ea3261b0aaf49bccc2170f8b2cde
-
 //            if (is_object($param)) {
-            $param = json_decode(json_encode($param), true);
+                $param = json_decode(json_encode($param), true);
 //            }
-
         }
 
     }
